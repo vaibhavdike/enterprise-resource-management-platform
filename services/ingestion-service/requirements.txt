@@ -1,3 +1,21 @@
-fastapi
-uvicorn
-pydantic
+# AWS
+boto3
+
+# Data Processing
+pandas
+openpyxl
+
+# Snowflake
+snowflake-connector-python
+
+# Environment Variables
+python-dotenv
+
+# Configuration
+PyYAML
+
+# Logging
+loguru
+
+# Testing
+pytest
