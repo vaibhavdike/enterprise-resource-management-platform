@@ -33,9 +33,15 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
 
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Login to Snowflake Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.SNOWFLAKE_REGISTRY }}
+          username: ${{ secrets.SNOWFLAKE_USER }}
+          password: ${{ secrets.SNOWFLAKE_PASSWORD }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
