@@ -1,6 +1,10 @@
-"""Application entry point."""
+from app.services.ingestion_service import IngestionService
 
 
-def main() -> None:
-    """Placeholder main function."""
-    print("Ingestion service started")
+def main():
+    ingestion = IngestionService()
+    ingestion.run()
+
+
+if __name__ == "__main__":
+    main()

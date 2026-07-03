@@ -26,6 +26,8 @@ class Settings:
     SNOWFLAKE_DATABASE = os.getenv("SNOWFLAKE_DATABASE")
     SNOWFLAKE_SCHEMA = os.getenv("SNOWFLAKE_SCHEMA")
     SNOWFLAKE_ROLE = os.getenv("SNOWFLAKE_ROLE")
+    SNOWFLAKE_STAGE_NAME = os.getenv("SNOWFLAKE_STAGE_NAME")
+    SNOWFLAKE_FILE_FORMAT = os.getenv("SNOWFLAKE_FILE_FORMAT")
 
     # Logging
     LOG_LEVEL = os.getenv("LOG_LEVEL")
