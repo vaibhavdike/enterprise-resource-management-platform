@@ -1,0 +1,22 @@
+spec:
+  containers:
+    - name: ingestion-service
+      image: a4357138117071-accelirate-partner.registry.snowflakecomputing.com/irm_db/raw/irm_image_repository:latest
+
+      env:
+        SNOWFLAKE_ACCOUNT: A4357138117071-ACCELIRATE_PARTNER
+        SNOWFLAKE_DATABASE: IRM_DB
+        SNOWFLAKE_SCHEMA: RAW
+        SNOWFLAKE_WAREHOUSE: DEMO_WH
+        SNOWFLAKE_ROLE: SYSADMIN
+
+      command:
+        - python
+
+      args:
+        - run.py
+
+  endpoints:
+    - name: ingestion
+      port: 8080
+      public: false
