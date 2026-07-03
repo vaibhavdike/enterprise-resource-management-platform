@@ -89,9 +89,9 @@ jobs:
         run: |
           docker tag \
             ingestion-service:latest \
-            ${{ secrets.SNOWFLAKE_IMAGE_REPOSITORY }}:latest
-      
+            ${{ secrets.SNOWFLAKE_IMAGE_REPOSITORY }}/ingestion-service:latest
+
       - name: Push Docker Image
         run: |
           docker push \
-            ${{ secrets.SNOWFLAKE_IMAGE_REPOSITORY }}:latest
+            ${{ secrets.SNOWFLAKE_IMAGE_REPOSITORY }}/ingestion-service:latest
