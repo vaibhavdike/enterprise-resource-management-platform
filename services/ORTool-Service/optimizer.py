@@ -26,7 +26,7 @@ import pandas as pd
 
 
 connection_params = {
-    "host": os.environ["SNOWFLAKE_HOST"],
+    "host": "od50605.us-east-2.aws.snowflakecomputing.com",
     "account": os.environ["SNOWFLAKE_ACCOUNT"],
     "authenticator": "oauth",
     "token": open("/snowflake/session/token").read().strip(),
