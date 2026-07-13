@@ -14,7 +14,7 @@ import pandas as pd
 # connection_parameters = {
 #     "account": "OD50605",
 #     "user": "VAIBHAVDIKE",
-#     "password": "Vaibhav@123456789",   # Don't hardcode real passwords
+#     "password": "Vaibhav@123456789",  
 #     "role": "SYSADMIN",
 #     "warehouse": "DEMO_WH",
 #     "database": "IRM_DB",
@@ -22,18 +22,6 @@ import pandas as pd
 # }
 
 # session = Session.builder.configs(connection_parameters).create() 
-
-# from snowflake.snowpark.context import get_active_session
-
-# session = get_active_session()
-
-
-
-# REMOVE THIS:
-# session = get_active_session()
-
-# REPLACE WITH:
-from snowflake.snowpark import Session
 
 connection_params = {
     "account": "A4357138117071-ACCELIRATE_PARTNER",
