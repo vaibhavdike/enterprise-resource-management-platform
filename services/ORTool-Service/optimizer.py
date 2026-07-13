@@ -59,7 +59,7 @@ print("\nLoading Supply View...")
 
 supply_df = (
     session
-    .table("V_OPT_SUPPLY")
+    .table("IRM_DB.OPERATIONAL.V_OPT_SUPPLY")
     .to_pandas()
 )
 
@@ -70,7 +70,7 @@ print("\nLoading Demand View...")
 
 demand_df = (
     session
-    .table("V_OPT_DEMAND")
+    .table("IRM_DB.OPERATIONAL.V_OPT_DEMAND")
     .to_pandas()
 )
 
@@ -80,7 +80,7 @@ print("\nLoading Eligibility View...")
 
 eligibility_df = (
     session
-    .table("V_OPT_ELIGIBILITY")
+    .table("IRM_DB.OPERATIONAL.V_OPT_ELIGIBILITY")
     .to_pandas()
 )
 
@@ -595,7 +595,7 @@ snow_df = session.create_dataframe(allocation_df)
 # Save to Snowflake
 # ------------------------------------------------------------
 snow_df.write.mode("overwrite").save_as_table(
-    "OPERATIONAL.OPTIMIZER_ALLOCATION_PLAN"
+    "IRM_DB.OPERATIONAL.OPTIMIZER_ALLOCATION_PLAN"
 )
 
 print("=" * 70)
