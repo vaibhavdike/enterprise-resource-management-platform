@@ -1,0 +1,13 @@
+IRM:
+  outputs:
+    dev:
+      account: A4357138117071-ACCELIRATE_PARTNER
+      database: IRM_DB
+      password: Vaibhav@123456789
+      role: SYSADMIN
+      schema: CURATED
+      threads: 1
+      type: snowflake
+      user: VAIBHAVDIKE
+      warehouse: DEMO_WH
+  target: dev

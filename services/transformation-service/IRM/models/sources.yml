@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: raw
+    database: IRM_DB
+    schema: RAW
+
+    tables:
+      - name: ADP_AVAILABILITY
+      - name: ADP_EMPLOYEES
+      - name: ADP_EMPLOYEE_SKILLS
+      - name: DEMAND_HISTORY
+      - name: NETSUITE_FINANCIAL_ACTUALS
+      - name: NETSUITE_PIPELINE_OPPORTUNITIES
+      - name: NETSUITE_PIPELINE_SKILL_DEMAND
+      - name: RESOURCE_GAPS_HISTORY
+      - name: SMARTSHEET_ALLOCATIONS
+      - name: SMARTSHEET_PROJECTS
+      - name: SMARTSHEET_TASKS
+    

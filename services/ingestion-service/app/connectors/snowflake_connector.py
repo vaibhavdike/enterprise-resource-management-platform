@@ -134,13 +134,14 @@ class SnowflakeConnector:
 
     def copy_into_table(self, table_name, stage_name, file_name):
         """
-        Load a CSV file from Snowflake Stage into a table.
+        Load a CSV file from Snowflake Stage into a table
+        and populate metadata columns.
         """
 
         if self.connection is None:
             self.connect()
 
-        query = f"""
+        copy_query = f"""
         COPY INTO {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.{table_name}
         FROM @{stage_name}/{file_name}
         FILE_FORMAT = (
@@ -149,16 +150,30 @@ class SnowflakeConnector:
         ON_ERROR = CONTINUE;
         """
 
+        metadata_query = f"""
+        UPDATE {settings.SNOWFLAKE_DATABASE}.{settings.SNOWFLAKE_SCHEMA}.{table_name}
+        SET
+            CREATED_AT = CURRENT_TIMESTAMP()
+        WHERE CREATED_AT IS NULL;
+        """
+
         try:
             cursor = self.connection.cursor(DictCursor)
 
-            cursor.execute(query)
+            # Load data
+            cursor.execute(copy_query)
+            load_result = cursor.fetchall()
 
-            result = cursor.fetchall()
+            # Populate metadata columns
+            cursor.execute(metadata_query)
+
+            self.connection.commit()
 
             cursor.close()
 
-            return result
+            print(f"✅ Loaded {file_name} into {table_name}")
+
+            return load_result
 
         except Exception as e:
             print(f"❌ Failed to load {file_name}: {e}")

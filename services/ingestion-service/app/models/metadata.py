@@ -7,5 +7,7 @@ FILE_TABLE_MAPPING = {
     "netsuite_pipeline_skill_demand.csv": "NETSUITE_PIPELINE_SKILL_DEMAND",
     "smartsheet_allocations.csv": "SMARTSHEET_ALLOCATIONS",
     "smartsheet_projects.csv": "SMARTSHEET_PROJECTS",
-    "smartsheet_tasks.csv": "SMARTSHEET_TASKS"
+    "smartsheet_tasks.csv": "SMARTSHEET_TASKS",
+    "demand_history.csv":"DEMAND_HISTORY",
+    "resource_gaps_history.csv":"RESOURCE_GAPS_HISTORY"
 }
