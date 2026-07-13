@@ -25,9 +25,18 @@ import pandas as pd
 
 
 
+
+
+# REMOVE THIS:
+# session = get_active_session()
+
+# REPLACE WITH:
+
+print(os.environ["SNOWFLAKE_ACCOUNT"])
+print(os.environ["SNOWFLAKE_HOST"])
 connection_params = {
-    "host": "od50605.us-east-2.aws.snowflakecomputing.com",
-    "account": os.environ["SNOWFLAKE_ACCOUNT"],
+    "account": "A4357138117071-ACCELIRATE_PARTNER",
+    "host": "a4357138117071-accelirate_partner.snowflakecomputing.com",
     "authenticator": "oauth",
     "token": open("/snowflake/session/token").read().strip(),
     "warehouse": "DEMO_WH",
