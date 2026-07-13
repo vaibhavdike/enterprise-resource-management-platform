@@ -11,21 +11,21 @@ import pandas as pd
 # 1. Snowflake Connection
 # ============================================================
 
-# connection_parameters = {
-#     "account": "A4357138117071-ACCELIRATE_PARTNER",
-#     "user": "VAIBHAVDIKE",
-#     "password": "Vaibhav@123456789",   # Don't hardcode real passwords
-#     "role": "SYSADMIN",
-#     "warehouse": "DEMO_WH",
-#     "database": "IRM_DB",
-#     "schema": "OPERATIONAL"
-# }
+connection_parameters = {
+    "account": "OD50605",
+    "user": "VAIBHAVDIKE",
+    "password": "Vaibhav@123456789",   # Don't hardcode real passwords
+    "role": "SYSADMIN",
+    "warehouse": "DEMO_WH",
+    "database": "IRM_DB",
+    "schema": "OPERATIONAL"
+}
 
-# session = Session.builder.configs(connection_parameters).create() 
+session = Session.builder.configs(connection_parameters).create() 
 
-from snowflake.snowpark.context import get_active_session
+# from snowflake.snowpark.context import get_active_session
 
-session = get_active_session()
+# session = get_active_session()
 
 print("=" * 70)
 print("Connected to Snowflake Successfully")
