@@ -28,7 +28,7 @@ print("Connected to Snowflake Successfully")
 print("=" * 70)
 
 # ============================================================
-# 2. Load Views
+# 2. Load Views from snowflake
 # ============================================================
 
 print("\nLoading Supply View...")
