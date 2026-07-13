@@ -39,6 +39,7 @@ supply_df = (
     .to_pandas()
 )
 
+
 print(f"Supply Rows : {len(supply_df)}")
 
 print("\nLoading Demand View...")

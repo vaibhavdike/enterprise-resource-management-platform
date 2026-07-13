@@ -1,0 +1,103 @@
+name: OR Tool Service CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/or-tool-service
+
+    paths:
+      - "services/ORTool-Service/**"
+      - ".github/workflows/ortool-service.yml"
+
+  pull_request:
+    branches:
+      - main
+
+    paths:
+      - "services/ORTool-Service/**"
+
+jobs:
+
+  ortool-ci:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: services/ORTool-Service
+
+    env:
+
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+      SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+      SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      SNOWFLAKE_DATABASE: ${{ secrets.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ secrets.SNOWFLAKE_SCHEMA }}
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test Snowflake Connection
+      run: |
+        python - <<EOF
+        import os
+        import snowflake.connector
+
+        conn = snowflake.connector.connect(
+            account=os.environ["SNOWFLAKE_ACCOUNT"],
+            user=os.environ["SNOWFLAKE_USER"],
+            password=os.environ["SNOWFLAKE_PASSWORD"],
+            role=os.environ["SNOWFLAKE_ROLE"],
+            warehouse=os.environ["SNOWFLAKE_WAREHOUSE"],
+            database=os.environ["SNOWFLAKE_DATABASE"],
+            schema=os.environ["SNOWFLAKE_SCHEMA"]
+        )
+
+        cur = conn.cursor()
+        cur.execute("SELECT CURRENT_VERSION()")
+
+        print("Connected Successfully")
+        print(cur.fetchone())
+
+        cur.close()
+        conn.close()
+
+        EOF
+
+    - name: Login to Snowflake Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ secrets.SNOWFLAKE_REGISTRY }}
+        username: ${{ secrets.SNOWFLAKE_USER }}
+        password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+
+    - name: Build Docker Image
+      run: |
+        docker build \
+        -t ortool-service:latest .
+
+    - name: Tag Docker Image
+      run: |
+        docker tag \
+        ortool-service:latest \
+        ${{ secrets.SNOWFLAKE_IMAGE_REPOSITORY }}/ortool-service:latest
+
+    - name: Push Docker    
+      run: |
+        docker push \
+        ${{ secrets.SNOWFLAKE_IMAGE_REPOSITORY }}/ortool-service:latest
