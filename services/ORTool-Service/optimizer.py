@@ -12,7 +12,7 @@ import pandas as pd
 # ============================================================
 
 # connection_parameters = {
-#     "account": "OD50605",
+#     "account": "A4357138117071-ACCELIRATE_PARTNER",
 #     "user": "VAIBHAVDIKE",
 #     "password": "Vaibhav@123456789",  
 #     "role": "SYSADMIN",
@@ -32,11 +32,12 @@ import pandas as pd
 
 # REPLACE WITH:
 
-print(os.environ["SNOWFLAKE_ACCOUNT"])
-print(os.environ["SNOWFLAKE_HOST"])
+import os
+
+
 connection_params = {
-    "account": "A4357138117071-ACCELIRATE_PARTNER",
-    "host": "a4357138117071-accelirate_partner.snowflakecomputing.com",
+    "host": os.environ["SNOWFLAKE_HOST"],
+    "account": os.environ["SNOWFLAKE_ACCOUNT"],
     "authenticator": "oauth",
     "token": open("/snowflake/session/token").read().strip(),
     "warehouse": "DEMO_WH",
