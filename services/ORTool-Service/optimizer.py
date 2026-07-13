@@ -2,7 +2,7 @@
 # optimizer.py
 # Intelligent Resource Allocation using Google OR-Tools
 # ============================================================
-
+import os
 from snowflake.snowpark import Session
 from ortools.linear_solver import pywraplp
 import pandas as pd
@@ -23,9 +23,11 @@ import pandas as pd
 
 # session = Session.builder.configs(connection_parameters).create() 
 
+
+
 connection_params = {
-    "account": "A4357138117071-ACCELIRATE_PARTNER",
-    "host": "a4357138117071-accelirate-partner.snowflakecomputing.com",
+    "host": os.environ["SNOWFLAKE_HOST"],
+    "account": os.environ["SNOWFLAKE_ACCOUNT"],
     "authenticator": "oauth",
     "token": open("/snowflake/session/token").read().strip(),
     "warehouse": "DEMO_WH",
