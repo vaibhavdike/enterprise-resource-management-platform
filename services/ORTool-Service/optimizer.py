@@ -42,7 +42,7 @@ connection_params = {
     "token": open("/snowflake/session/token").read().strip(),
     "warehouse": "DEMO_WH",
     "database": "IRM_DB",
-    "schema": "RAW"
+    "schema": "OPERATIONAL"
 }
 
 session = Session.builder.configs(connection_params).create()
