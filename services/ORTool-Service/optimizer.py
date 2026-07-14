@@ -11,17 +11,17 @@ import pandas as pd
 # 1. Snowflake Connection
 # ============================================================
 
-connection_parameters = {
-    "account": "A4357138117071-ACCELIRATE_PARTNER",
-    "user": "VAIBHAVDIKE",
-    "password": "Vaibhav@123456789",  
-    "role": "SYSADMIN",
-    "warehouse": "DEMO_WH",
-    "database": "IRM_DB",
-    "schema": "OPERATIONAL"
-}
+# connection_parameters = {
+#     "account": "A4357138117071-ACCELIRATE_PARTNER",
+#     "user": "VAIBHAVDIKE",
+#     "password": "Vaibhav@123456789",  
+#     "role": "SYSADMIN",
+#     "warehouse": "DEMO_WH",
+#     "database": "IRM_DB",
+#     "schema": "OPERATIONAL"
+# }
 
-session = Session.builder.configs(connection_parameters).create() 
+# session = Session.builder.configs(connection_parameters).create() 
 
 
 
@@ -32,20 +32,20 @@ session = Session.builder.configs(connection_parameters).create()
 
 # REPLACE WITH:
 
-# import os
+import os
 
 
-# connection_params = {
-#     "host": os.environ["SNOWFLAKE_HOST"],
-#     "account": os.environ["SNOWFLAKE_ACCOUNT"],
-#     "authenticator": "oauth",
-#     "token": open("/snowflake/session/token").read().strip(),
-#     "warehouse": "DEMO_WH",
-#     "database": "IRM_DB",
-#     "schema": "OPERATIONAL"
-# }
+connection_params = {
+    "host": os.environ["SNOWFLAKE_HOST"],
+    "account": os.environ["SNOWFLAKE_ACCOUNT"],
+    "authenticator": "oauth",
+    "token": open("/snowflake/session/token").read().strip(),
+    "warehouse": "DEMO_WH",
+    "database": "IRM_DB",
+    "schema": "OPERATIONAL"
+}
 
-# session = Session.builder.configs(connection_params).create()
+session = Session.builder.configs(connection_params).create()
 
 print("=" * 70)
 print("Connected to Snowflake Successfully")
