@@ -27,7 +27,7 @@ class SnowflakeConnector:
                     warehouse=settings.SNOWFLAKE_WAREHOUSE,
                     database=settings.SNOWFLAKE_DATABASE,
                     schema=settings.SNOWFLAKE_SCHEMA,
-                    role=settings.SNOWFLAKE_ROLE,
+                       role=settings.SNOWFLAKE_ROLE,
                 )
 
                 print("✅ Successfully connected to Snowflake.")

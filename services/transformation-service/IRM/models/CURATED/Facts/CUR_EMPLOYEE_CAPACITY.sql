@@ -6,6 +6,8 @@
 
 select
 
+  md5(EMPLOYEE_ID || '|' || PERIOD_MONTH) as EMPLOYEE_CAPACITY_SK,
+
     EMPLOYEE_ID,
 
     PERIOD_MONTH,

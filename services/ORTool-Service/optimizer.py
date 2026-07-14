@@ -11,17 +11,17 @@ import pandas as pd
 # 1. Snowflake Connection
 # ============================================================
 
-# connection_parameters = {
-#     "account": "A4357138117071-ACCELIRATE_PARTNER",
-#     "user": "VAIBHAVDIKE",
-#     "password": "Vaibhav@123456789",  
-#     "role": "SYSADMIN",
-#     "warehouse": "DEMO_WH",
-#     "database": "IRM_DB",
-#     "schema": "OPERATIONAL"
-# }
+connection_parameters = {
+    "account": "A4357138117071-ACCELIRATE_PARTNER",
+    "user": "VAIBHAVDIKE",
+    "password": "Vaibhav@123456789",  
+    "role": "SYSADMIN",
+    "warehouse": "DEMO_WH",
+    "database": "IRM_DB",
+    "schema": "OPERATIONAL"
+}
 
-# session = Session.builder.configs(connection_parameters).create() 
+session = Session.builder.configs(connection_parameters).create() 
 
 
 
@@ -32,20 +32,20 @@ import pandas as pd
 
 # REPLACE WITH:
 
-import os
+# import os
 
 
-connection_params = {
-    "host": os.environ["SNOWFLAKE_HOST"],
-    "account": os.environ["SNOWFLAKE_ACCOUNT"],
-    "authenticator": "oauth",
-    "token": open("/snowflake/session/token").read().strip(),
-    "warehouse": "DEMO_WH",
-    "database": "IRM_DB",
-    "schema": "OPERATIONAL"
-}
+# connection_params = {
+#     "host": os.environ["SNOWFLAKE_HOST"],
+#     "account": os.environ["SNOWFLAKE_ACCOUNT"],
+#     "authenticator": "oauth",
+#     "token": open("/snowflake/session/token").read().strip(),
+#     "warehouse": "DEMO_WH",
+#     "database": "IRM_DB",
+#     "schema": "OPERATIONAL"
+# }
 
-session = Session.builder.configs(connection_params).create()
+# session = Session.builder.configs(connection_params).create()
 
 print("=" * 70)
 print("Connected to Snowflake Successfully")
@@ -70,7 +70,7 @@ print("\nLoading Demand View...")
 
 demand_df = (
     session
-    .table("IRM_DB.OPERATIONAL.V_OPT_DEMAND")
+    .table("IRM_DB.OPERATIONAL.VW_OPT_DEMAND")
     .to_pandas()
 )
 
@@ -312,126 +312,28 @@ print("\nBuilding Objective Function...")
 
 objective = solver.Objective()
 
-# ------------------------------------------------------------
-# Find the first month of every Opportunity
-# ------------------------------------------------------------
-
-project_start_month = (
-    demand_df
-    .groupby("OPPORTUNITY_ID")["PERIOD_MONTH"]
-    .min()
-    .to_dict()
-)
-
-# ------------------------------------------------------------
-# Build Objective
-# ------------------------------------------------------------
-
 for (employee_id, demand_id), var in decision_variables.items():
 
-    # -----------------------------
-    # Demand Information
-    # -----------------------------
     demand = demand_df[
         demand_df["DEMAND_ID"] == demand_id
     ].iloc[0]
 
-    # -----------------------------
-    # Supply Information
-    # -----------------------------
     supply = supply_df[
         (supply_df["EMPLOYEE_ID"] == employee_id) &
         (supply_df["SKILL_ID"] == demand["SKILL_ID"]) &
         (supply_df["PERIOD_MONTH"] == demand["PERIOD_MONTH"])
     ].iloc[0]
 
-    # -----------------------------
-    # Business Factors
-    # -----------------------------
-    priority = float(demand["PRIORITY"])
-
-    win_probability = float(demand["WIN_PROBABILITY"])
-
-    estimated_value = float(demand["ESTIMATED_VALUE"])
-
-    # -----------------------------
-    # Employee Factors
-    # -----------------------------
     proficiency = float(supply["PROFICIENCY"])
 
     is_primary = 1 if supply["IS_PRIMARY"] else 0
 
     cost_rate = float(supply["COST_RATE_HOURLY"])
 
-    # ---------------------------------------------------------
-    # Continuity Bonus
-    # ---------------------------------------------------------
-
-    continuity_bonus = 0
-
-    first_month = project_start_month[
-        demand["OPPORTUNITY_ID"]
-    ]
-
-    # First month -> encourage selecting strong employees
-    if demand["PERIOD_MONTH"] == first_month:
-
-        continuity_bonus = 150
-
-    else:
-
-        # Previous month of same opportunity
-        previous_month = (
-            pd.to_datetime(demand["PERIOD_MONTH"])
-            - pd.DateOffset(months=1)
-        )
-
-        previous_month = previous_month.strftime("%Y-%m-%d")
-
-        previous_assignment = demand_df[
-            (demand_df["OPPORTUNITY_ID"] == demand["OPPORTUNITY_ID"]) &
-            (
-                pd.to_datetime(demand_df["PERIOD_MONTH"])
-                == pd.to_datetime(previous_month)
-            )
-        ]
-
-        if len(previous_assignment) > 0:
-
-            continuity_bonus = 200
-
-    # ---------------------------------------------------------
-    # Final Score
-    # ---------------------------------------------------------
-
     score = (
-
-        priority * 150
-
-        +
-
-        win_probability * 80
-
-        +
-
-        proficiency * 40
-
-        +
-
-        is_primary * 250
-
-        +
-
-        (estimated_value / 100000)
-
-        +
-
-        continuity_bonus
-
-        -
-
-        (cost_rate * 0.05)
-
+        proficiency * 100
+        + is_primary * 50
+        - cost_rate * 0.10
     )
 
     objective.SetCoefficient(var, score)
@@ -508,13 +410,9 @@ for (employee_id, demand_id), var in decision_variables.items():
 
             "PERIOD_MONTH": demand["PERIOD_MONTH"],
 
+            "DEMAND_HOURS": demand["DEMAND_HOURS"],
+
             "ASSIGNED_HOURS": round(assigned_hours, 2),
-
-            "PRIORITY": demand["PRIORITY"],
-
-            "WIN_PROBABILITY": demand["WIN_PROBABILITY"],
-
-            "ESTIMATED_VALUE": demand["ESTIMATED_VALUE"],
 
             "PROFICIENCY": supply["PROFICIENCY"],
 
@@ -522,8 +420,7 @@ for (employee_id, demand_id), var in decision_variables.items():
 
             "COST_RATE_HOURLY": supply["COST_RATE_HOURLY"]
 
-        })
-
+          })
 allocation_df = pd.DataFrame(allocation_results)
 
 print(f"\nAssignments Created : {len(allocation_df)}")
@@ -549,18 +446,13 @@ allocation_df["RUN_TS"] = pd.Timestamp.now()
 # ------------------------------------------------------------
 # Convert datatypes
 # ------------------------------------------------------------
-allocation_df["PERIOD_MONTH"] = pd.to_datetime(
-    allocation_df["PERIOD_MONTH"]
-)
+allocation_df["PERIOD_MONTH"] = pd.to_datetime(allocation_df["PERIOD_MONTH"])
 
+allocation_df["DEMAND_HOURS"] = allocation_df["DEMAND_HOURS"].astype(float)
 allocation_df["ASSIGNED_HOURS"] = allocation_df["ASSIGNED_HOURS"].astype(float)
-allocation_df["WIN_PROBABILITY"] = allocation_df["WIN_PROBABILITY"].astype(float)
-allocation_df["ESTIMATED_VALUE"] = allocation_df["ESTIMATED_VALUE"].astype(float)
 allocation_df["COST_RATE_HOURLY"] = allocation_df["COST_RATE_HOURLY"].astype(float)
 allocation_df["PROFICIENCY"] = allocation_df["PROFICIENCY"].astype(int)
-allocation_df["PRIORITY"] = allocation_df["PRIORITY"].astype(int)
 allocation_df["IS_PRIMARY"] = allocation_df["IS_PRIMARY"].astype(bool)
-
 # ------------------------------------------------------------
 # Arrange Columns
 # ------------------------------------------------------------
@@ -573,16 +465,12 @@ allocation_df = allocation_df[
         "BUSINESS_UNIT",
         "SKILL_ID",
         "PERIOD_MONTH",
+        "DEMAND_HOURS",
         "ASSIGNED_HOURS",
-        "PRIORITY",
-        "WIN_PROBABILITY",
-        "ESTIMATED_VALUE",
         "PROFICIENCY",
         "IS_PRIMARY",
         "COST_RATE_HOURLY"
-    ]
-]
-
+    ]]
 print("\nData Types")
 print(allocation_df.dtypes)
 

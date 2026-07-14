@@ -5,7 +5,7 @@
 ) }}
 
 select
-
+  md5(ALLOCATION_ID) as ALLOCATION_SK,
     ALLOCATION_ID,
 
     PROJECT_ID,
