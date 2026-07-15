@@ -9,43 +9,41 @@ import pandas as pd
 
 # ============================================================
 # 1. Snowflake Connection
-# ============================================================
-
-# connection_parameters = {
-#     "account": "A4357138117071-ACCELIRATE_PARTNER",
-#     "user": "VAIBHAVDIKE",
-#     "password": "Vaibhav@123456789",  
-#     "role": "SYSADMIN",
-#     "warehouse": "DEMO_WH",
-#     "database": "IRM_DB",
-#     "schema": "OPERATIONAL"
-# }
-
-# session = Session.builder.configs(connection_parameters).create() 
+# ============================================================ 
 
 
+# for local development 
 
-
-
-# REMOVE THIS:
-# session = get_active_session()
-
-# REPLACE WITH:
-
-import os
-
-
-connection_params = {
-    "host": os.environ["SNOWFLAKE_HOST"],
-    "account": os.environ["SNOWFLAKE_ACCOUNT"],
-    "authenticator": "oauth",
-    "token": open("/snowflake/session/token").read().strip(),
+connection_parameters = {
+    "account": "A4357138117071-ACCELIRATE_PARTNER",
+    "user": "VAIBHAVDIKE",
+    "password": "Vaibhav@123456789",  
+    "role": "SYSADMIN",
     "warehouse": "DEMO_WH",
     "database": "IRM_DB",
     "schema": "OPERATIONAL"
 }
 
-session = Session.builder.configs(connection_params).create()
+session = Session.builder.configs(connection_parameters).create() 
+
+
+
+# for production 
+
+# import os
+
+
+# connection_params = {
+#     "host": os.environ["SNOWFLAKE_HOST"],
+#     "account": os.environ["SNOWFLAKE_ACCOUNT"],
+#     "authenticator": "oauth",
+#     "token": open("/snowflake/session/token").read().strip(),
+#     "warehouse": "DEMO_WH",
+#     "database": "IRM_DB",
+#     "schema": "OPERATIONAL"
+# }
+
+# session = Session.builder.configs(connection_params).create()
 
 print("=" * 70)
 print("Connected to Snowflake Successfully")
@@ -330,8 +328,20 @@ for (employee_id, demand_id), var in decision_variables.items():
 
     cost_rate = float(supply["COST_RATE_HOURLY"])
 
+    capacity_hours = float(supply["CAPACITY_HOURS"])
+    # Prefer employees with full availability
+    if capacity_hours >= 160:
+        availability_bonus = 1000
+    elif capacity_hours >= 120:
+        availability_bonus = 500
+    elif capacity_hours >= 80:
+        availability_bonus = 200
+    else:
+        availability_bonus = 0
+
     score = (
-        proficiency * 100
+        availability_bonus 
+        +proficiency * 100
         + is_primary * 50
         - cost_rate * 0.10
     )
