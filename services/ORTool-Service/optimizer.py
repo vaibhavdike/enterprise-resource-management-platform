@@ -1,6 +1,6 @@
 # ============================================================
 # optimizer.py
-# Intelligent Resource Allocation using Google OR-Tools
+# Intelligent Resource Allocation
 #
 # UPDATED (this revision):
 #
