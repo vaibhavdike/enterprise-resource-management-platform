@@ -1,6 +1,6 @@
 # ============================================================
 # optimizer.py
-# Intelligent Resource Allocation
+# Intelligent Resource Allocation POC
 #
 # UPDATED (this revision):
 #
