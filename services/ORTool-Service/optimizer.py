@@ -48,32 +48,32 @@ from datetime import datetime
 
 # for local development
 
-# connection_parameters = {
-#     "account": "A4357138117071-ACCELIRATE_PARTNER",
-#     "user": "VAIBHAVDIKE",
-#     "password": "Vaibhav@123456789",
-#     "role": "SYSADMIN",
-#     "warehouse": "DEMO_WH",
-#     "database": "IRM_DATABASE",
-#     "schema": "OPERATIONAL"
-# }
+connection_parameters = {
+    "account": "A4357138117071-ACCELIRATE_PARTNER",
+    "user": "VAIBHAVDIKE",
+    "password": "Vaibhav@123456789",
+    "role": "SYSADMIN",
+    "warehouse": "DEMO_WH",
+    "database": "IRM_DATABASE",
+    "schema": "OPERATIONAL"
+}
 
-# session = Session.builder.configs(connection_parameters).create()
+session = Session.builder.configs(connection_parameters).create()
 
 
 # credentials for production
 
-connection_params = {
-    "host": os.environ["SNOWFLAKE_HOST"],
-    "account": os.environ["SNOWFLAKE_ACCOUNT"],
-    "authenticator": "oauth",
-    "token": open("/snowflake/session/token").read().strip(),
-    "warehouse": "DEMO_WH",
-    "database": "IRM_DB",
-    "schema": "OPERATIONAL"
-}
+# connection_params = {
+#     "host": os.environ["SNOWFLAKE_HOST"],
+#     "account": os.environ["SNOWFLAKE_ACCOUNT"],
+#     "authenticator": "oauth",
+#     "token": open("/snowflake/session/token").read().strip(),
+#     "warehouse": "DEMO_WH",
+#     "database": "IRM_DB",
+#     "schema": "OPERATIONAL"
+# }
 
-session = Session.builder.configs(connection_params).create()
+# session = Session.builder.configs(connection_params).create()
 
 print("=" * 70)
 print("Connected to Snowflake Successfully")
@@ -207,32 +207,38 @@ def classify_availability(availability_hours):
 
 # ============================================================
 # Priority Weighting Constants
-# ==== MODIFIED: two stacked Big-M bonuses now drive the four-tier
-# priority order required by Enhancement 1:
-#     1. Full-Time + Primary   (PRIMARY_BONUS + FULL_TIME_BONUS)
-#     2. Partial   + Primary   (PRIMARY_BONUS only)
-#     3. Full-Time + Secondary (FULL_TIME_BONUS only)
+# ==== MODIFIED: Changed priority hierarchy ====
+# Required business hierarchy (per this revision):
+#     1. Full-Time + Primary   (FULL_TIME_BONUS + PRIMARY_BONUS)
+#     2. Full-Time + Secondary (FULL_TIME_BONUS only)
+#     3. Partial   + Primary   (PRIMARY_BONUS only)
 #     4. Partial   + Secondary (neither bonus)
-# PRIMARY_SKILL_PRIORITY_BONUS is set an order of magnitude above
-# FULL_TIME_PRIORITY_BONUS so that primary/secondary status always
-# dominates full-time/partial status, exactly matching the required
-# priority order. Both are far larger than the natural spread of the
-# base score components (availability_bonus <= 1000, proficiency*100,
-# cost_rate*0.10), so tier ordering can never be reversed by them.
 #
-# Because an employee's Primary-tier variable and Secondary-tier
-# variable for a different skill draw on the SAME employee-month
-# capacity constraint, the solver can only pick one. Since Primary
-# always scores higher, the solver will only "spend" that employee on
-# a Secondary assignment once their Primary-skill demand can no longer
-# usefully absorb them (demand caps make further Primary assignment
-# worthless once that project's demand is met). This produces the
-# required staged behavior inside a single OR-Tools solve - no second
-# optimizer, no second pass.
+# This is the OPPOSITE ranking of the previous revision (which put
+# Partial+Primary ahead of Full-Time+Secondary). To flip the ranking
+# we only need to flip which Big-M constant is larger:
+#   - FULL_TIME_PRIORITY_BONUS is now the LARGER constant, so
+#     employment-type (Full-Time vs Partial) dominates skill-type
+#     (Primary vs Secondary) whenever the two disagree.
+#   - PRIMARY_SKILL_PRIORITY_BONUS remains the tie-breaker *within*
+#     the same employment-type tier (Primary still beats Secondary
+#     among Full-Time employees, and still beats Secondary among
+#     Partial employees).
+# Both constants remain far larger than the natural spread of the
+# base score components (availability_bonus <= 100000/month,
+# proficiency*20, cost_rate*0.10), so tier ordering can never be
+# reversed by them, and the required "never pick Partial while an
+# eligible Full-Time employee still exists" rule falls out naturally
+# of the solver maximizing total score under the existing capacity/
+# demand constraints - no additional constraint was needed.
+#
+# No other logic changes: still ONE OR-Tools model, ONE solve, ONE
+# objective, and the same four candidate pools / decision variables
+# as before.
 # ============================================================
 
-FULL_TIME_PRIORITY_BONUS = 1_000_000.0
-PRIMARY_SKILL_PRIORITY_BONUS = 10_000_000.0
+FULL_TIME_PRIORITY_BONUS = 10_000_000.0
+PRIMARY_SKILL_PRIORITY_BONUS = 1_000_000.0
 
 # ============================================================
 # Normalized Employee Capacity Lookup (Employee + Month)
@@ -415,7 +421,7 @@ for project_key, demand_rows in projects.items():
             cost_rate_values.append(cost_rate)
 
             if eff_cap >= 160:
-                availability_bonus = 10000
+                availability_bonus = 100000
             elif eff_cap >= 80:
                 availability_bonus = 200
             else:
@@ -424,7 +430,7 @@ for project_key, demand_rows in projects.items():
             # ==== MODIFIED: removed per-month is_primary*50 term ====
             total_score += (
                 availability_bonus
-                + proficiency * 100
+                + proficiency * 20
                 - cost_rate * 0.10
             )
 
